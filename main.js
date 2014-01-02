@@ -42,12 +42,13 @@ $(function () {
         "Bb5": 932.33,
         "B5": 987.77
     };
+    var ZOOM_INC = 1.5;
+
+    var zoomLevel = 10;
 
     var calculateY = function (x, key) {
         var freq = PIANO_KEY_FREQUENCIES[key];
-        // The constant is just to scale it to fit on screen
-        // TODO define elsewhere (make zoomable?)
-        var y = Math.sin((x * freq) / 100);
+        var y = Math.sin((x * freq) / zoomLevel);
         return y;
     };
 
@@ -100,6 +101,15 @@ $(function () {
         }
         visContext.stroke();
     };
+
+    visCanvasJQ.on('mousewheel', function (e) {
+        if (e.originalEvent.deltaY > 0) {
+            zoomLevel = zoomLevel / ZOOM_INC;
+        } else {
+            zoomLevel = zoomLevel * ZOOM_INC;
+        }
+        updateVisualisation();
+    });
 
 
     // visContext.beginPath();

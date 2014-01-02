@@ -1,3 +1,11 @@
+IDEAS:
+
+Hookup sound, to optionally play the notes/chords selected.
+Chuck in a HUD showing numbers like:
+ - wavelength shown
+ - wavelengths selected
+ - The total wavelength, where the pattern of the combined notes repeats?
+
 
 
 // Black key position generator
