@@ -70,10 +70,25 @@ $(function () {
 
     resetZoom();
 
+    // From http://en.wikipedia.org/wiki/Bhaskara_I's_sine_approximation_formula
+    // Only works from 0 to PI, so does some conversion/correction.
+    // Hopefully this is faster than Math.sin
+    var sineApproximation = function (x) {
+        var divisor = Math.floor(x / Math.PI);
+        x = x % Math.PI;
+        var y = (16 * x * (Math.PI - x)) / ((5 * Math.PI * Math.PI) - (4 * x * (Math.PI - x)));
+        if (divisor % 2 !== 0) {
+            // If PI wholly fit x an odd number of times then y is in the negative
+            //  half of the sine curve
+            y = -y;
+        }
+        return y;
+    };
+
     // Calculates the y position of the wave for the given key at the given x
     var calculateY = function (x, key) {
         var freq = PIANO_KEY_FREQUENCIES[key];
-        var y = Math.sin(x * freq);
+        var y = sineApproximation(x * freq);
         return y;
     };
 
@@ -129,14 +144,14 @@ $(function () {
             y = 0;
             for (i = 0; i < keys.length; i++) {
                 ppp = pointsForKey[keys[i]];
-                y += Math.sin((x % ppp / ppp) * 2 * Math.PI);
+                y += sineApproximation((x % ppp / ppp) * 2 * Math.PI);
             }
             deltaY = 127;
             // Damper the start and end
             if (x < damper) {
-                deltaY *= Math.sin((x / damper) * (Math.PI / 2));
+                deltaY *= sineApproximation((x / damper) * (Math.PI / 2));
             } else if (x > sampleRate - damper) {
-                deltaY *= Math.sin(((sampleRate - x) / damper) * (Math.PI / 2));
+                deltaY *= sineApproximation(((sampleRate - x) / damper) * (Math.PI / 2));
             }
             y = y / keys.length;
             data.push(128 + Math.round(y * deltaY));
