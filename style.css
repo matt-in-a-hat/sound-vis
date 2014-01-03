@@ -1,3 +1,8 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    text-align: left;
+}
 
 html {
     width: 100%;
@@ -34,7 +39,7 @@ canvas {
 
 .piano-keyboard {
     height: 100%;
-    width: 1140px;
+    width: 1200px;
     display: inline-block;
 }
 
@@ -50,6 +55,8 @@ canvas {
     height: 92%;
     z-index: 5;
     border: solid white 5px;
+    margin-left: 2px;
+    margin-right: 2px;
 }
 
 .black-key {
@@ -59,6 +66,7 @@ canvas {
     position: absolute;
     z-index: 10;
     border: solid black 5px;
+    top: 0;
 }
 
 .piano-key:hover {

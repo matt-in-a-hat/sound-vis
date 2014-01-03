@@ -23,3 +23,5 @@ for (var i = 0; i < 100; i++) {
     }
 }
 ```
+
+Thanks to Pedro Ladaria for the audio library at http://codebase.es/riffwave/

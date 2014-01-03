@@ -170,7 +170,7 @@ $(function () {
     };
 
     // Capture scrolling as zooming in/out of visualisation
-    $(document).on('mousewheel', function (e) {
+    $(document).on('wheel', function (e) {
         if (e.originalEvent.deltaY > 0) {
             zoomLevel = zoomLevel / ZOOM_INC;
         } else {
