@@ -1,5 +1,5 @@
 /*jslint indent:4*/
-/*global $, document*/
+/*global $, document, RIFFWAVE, Audio*/
 
 $(function () {
 
@@ -43,6 +43,12 @@ $(function () {
         "B5": 987.77
     };
     var ZOOM_INC = Math.PI / 2;
+
+    var audio = new Audio(); // create the HTML5 audio element
+    var wave = new RIFFWAVE(); // create an empty wave file
+    var sampleRate = 44100;
+    var damper = 2000;
+    wave.header.sampleRate = sampleRate;
 
     var visCanvasJQ = $('#visualisation_canvas');
     var visCanvas = visCanvasJQ[0];
@@ -89,8 +95,9 @@ $(function () {
             noteTotal = 0;
             noteCount = 0;
             for (i = keys.length - 1; i >= 0; i--) {
+                y = calculateY(scaledX, keys[i]);
                 noteCount += 1;
-                noteTotal += calculateY(scaledX, keys[i]);
+                noteTotal += y;
             }
 
             y = visCenterHeight - (noteTotal / noteCount) * (visCenterHeight - 2);
@@ -104,12 +111,48 @@ $(function () {
         visContext.stroke();
     };
 
+    // Using Riffwave, generate the sound of the displayed wave
+    var playSound = function () {
+        var keys = Object.keys(playingKeys);
+        if (keys.length === 0) {
+            return;
+        }
+
+        var i, x, y, ppp, deltaY;
+        var data = [];
+        var pointsForKey = {};
+        // Work out how many points are in each period for each key
+        for (i = 0; i < keys.length; i++) {
+            pointsForKey[keys[i]] = sampleRate / PIANO_KEY_FREQUENCIES[keys[i]];
+        }
+        for (x = 0; x < sampleRate; x++) {
+            y = 0;
+            for (i = 0; i < keys.length; i++) {
+                ppp = pointsForKey[keys[i]];
+                y += Math.sin((x % ppp / ppp) * 2 * Math.PI);
+            }
+            deltaY = 127;
+            // Damper the start and end
+            if (x < damper) {
+                deltaY *= Math.sin((x / damper) * (Math.PI / 2));
+            } else if (x > sampleRate - damper) {
+                deltaY *= Math.sin(((sampleRate - x) / damper) * (Math.PI / 2));
+            }
+            y = y / keys.length;
+            data.push(128 + Math.round(y * deltaY));
+            // data.push(i % 10 < 5 === 0 ? 1 : 254);
+        }
+        wave.Make(data); // make the wave file
+        audio.src = wave.dataURI; // set audio source
+        audio.play();
+    };
+
     // Clears the canvas and draws the selected keys
-    var updateVisualisation = function () {
+    var updateVisualisation = function (lineWidth) {
         visContext.fillStyle = "#EEE";
         visContext.fillRect(0, 0, visCanvas.width, visCanvas.height);
 
-        drawWave(Object.keys(playingKeys), "black", 2);
+        drawWave(Object.keys(playingKeys), "black", lineWidth || 1);
     };
 
     // Updates the text at the bottom of the page
@@ -156,7 +199,7 @@ $(function () {
         var key = e.currentTarget;
         var keyID = key.id;
         if (PIANO_KEY_FREQUENCIES[keyID]) {
-            updateVisualisation();
+            updateVisualisation(2);
             drawWave([keyID], "#48F", 1);
         }
     });
@@ -172,4 +215,8 @@ $(function () {
         refreshZoom();
     });
 
+    // Play sound
+    visCanvasJQ.on('click', function (e) {
+        playSound();
+    });
 });

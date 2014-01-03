@@ -1,10 +1,14 @@
 #### Simple web app for visualising music notes/chords as combined sound waves.
 
 
+Click notes to combine waves. Click again to deselect.
+Use mouse scroll on wave to zoom in/out.
+Click the wave to play the note(s)/chord. Warning: start with your speakers on low volume!
+
+
 Further ideas:
 
- - Hookup sound, to optionally play the notes/chords selected.
- - The total wavelength, where the pattern of the combined notes repeats?
+ - Display the total wavelength, approximately where the pattern of the combined notes repeats?
 
 
 
