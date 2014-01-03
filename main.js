@@ -42,18 +42,7 @@ $(function () {
         "Bb5": 932.33,
         "B5": 987.77
     };
-    var ZOOM_INC = 1.5;
-
-    var zoomLevel = 10;
-
-    var calculateY = function (x, key) {
-        var freq = PIANO_KEY_FREQUENCIES[key];
-        var y = Math.sin((x * freq) / zoomLevel);
-        return y;
-    };
-
-    var periodScale = 4;
-
+    var ZOOM_INC = Math.PI / 2;
 
     var visCanvasJQ = $('#visualisation_canvas');
     var visCanvas = visCanvasJQ[0];
@@ -64,6 +53,17 @@ $(function () {
 
     var visCenterHeight = Math.ceil(visCanvas.height / 2);
     var visCanvasWidth = visCanvas.width;
+
+
+    // Default to the width of 10 * the period of C4.
+    var frequencyDisplayed = 261.63 / 10;
+    var zoomLevel = visCanvas.width * frequencyDisplayed;
+
+    var calculateY = function (x, key) {
+        var freq = PIANO_KEY_FREQUENCIES[key];
+        var y = Math.sin(x * freq);
+        return y;
+    };
 
 
     var playingKeys = {};
@@ -78,10 +78,10 @@ $(function () {
         visContext.beginPath();
 
         var x, y, scaledX, keys, noteTotal, noteCount, i;
-        var xScaler = visCanvasWidth / (periodScale * 2 * Math.PI);
+        var xScaler = 2 * Math.PI / zoomLevel;
         var placed = false;
         for (x = 1; x < visCanvasWidth; x++) {
-            scaledX = x / xScaler;
+            scaledX = x * xScaler;
 
             keys = Object.keys(playingKeys);
             noteTotal = 0;
@@ -108,9 +108,13 @@ $(function () {
         } else {
             zoomLevel = zoomLevel * ZOOM_INC;
         }
+        frequencyDisplayed = zoomLevel / visCanvas.width;
+        $('#hud').text("Time shown approx. " + frequencyDisplayed.toPrecision(4) + "Hz");
         updateVisualisation();
     });
 
+
+    // Show another line (e.g. the individual notes)
 
     // visContext.beginPath();
     // visContext.moveTo(eq(1), visCenterHeight);
@@ -121,20 +125,6 @@ $(function () {
     // for (x = 1; x < visCanvasWidth; x++) {
     //     scaledX = x / xScaler;
     //     y = visCenterHeight - eq(scaledX) * visCenterHeight;
-    //     visContext.lineTo(x, y);
-    // }
-    // visContext.stroke();
-
-
-    // visContext.beginPath();
-    // visContext.moveTo(eq(1), visCenterHeight);
-    // visContext.strokeStyle = "red";
-    // visContext.lineWidth = 1;
-
-    // xScaler = visCanvasWidth / (periodScale * 2 * Math.PI);
-    // for (x = 1; x < visCanvasWidth; x++) {
-    //     scaledX = x / xScaler;
-    //     y = visCenterHeight - eq2(scaledX) * visCenterHeight;
     //     visContext.lineTo(x, y);
     // }
     // visContext.stroke();
