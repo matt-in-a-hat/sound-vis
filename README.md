@@ -1,5 +1,4 @@
--- Simple web app for visualising music notes/chords as combined sound waves.
-
+#### Simple web app for visualising music notes/chords as combined sound waves.
 
 
 Further ideas:
@@ -11,7 +10,7 @@ Further ideas:
 
 
 
-For my reference
+For my reference:
 ```javascript
 // Black key position generator
 
