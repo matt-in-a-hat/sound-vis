@@ -55,9 +55,15 @@ $(function () {
     var visCanvasWidth = visCanvas.width;
 
 
-    // Default to the width of 10 * the period of C4.
-    var frequencyDisplayed = 261.63 / 10;
-    var zoomLevel = visCanvas.width * frequencyDisplayed;
+    var frequencyDisplayed, zoomLevel;
+
+    var resetZoom = function () {
+        // Default to the width of 10 * the period of C4.
+        frequencyDisplayed = 261.63 / 10;
+        zoomLevel = visCanvas.width * frequencyDisplayed;
+    };
+
+    resetZoom();
 
     var calculateY = function (x, key) {
         var freq = PIANO_KEY_FREQUENCIES[key];
@@ -65,33 +71,27 @@ $(function () {
         return y;
     };
 
-
     var playingKeys = {};
 
-    var updateVisualisation = function () {
-
-        visContext.fillStyle = "#EEE";
-        visContext.fillRect(0, 0, visCanvas.width, visCanvas.height);
-
-        visContext.strokeStyle = "black";
-        visContext.lineWidth = 2;
+    var drawWave = function (keys, color, lineWidth) {
+        visContext.strokeStyle = color;
+        visContext.lineWidth = lineWidth;
         visContext.beginPath();
 
-        var x, y, scaledX, keys, noteTotal, noteCount, i;
+        var x, y, scaledX, noteTotal, noteCount, i;
         var xScaler = 2 * Math.PI / zoomLevel;
         var placed = false;
         for (x = 1; x < visCanvasWidth; x++) {
             scaledX = x * xScaler;
 
-            keys = Object.keys(playingKeys);
             noteTotal = 0;
-            noteCount = keys.length;
+            noteCount = 0;
             for (i = keys.length - 1; i >= 0; i--) {
                 noteCount += 1;
                 noteTotal += calculateY(scaledX, keys[i]);
             }
 
-            y = visCenterHeight - (noteTotal / noteCount) * visCenterHeight;
+            y = visCenterHeight - (noteTotal / noteCount) * (visCenterHeight - 2);
             if (placed) {
                 visContext.lineTo(x, y);
             } else {
@@ -102,16 +102,33 @@ $(function () {
         visContext.stroke();
     };
 
-    visCanvasJQ.on('mousewheel', function (e) {
+    var updateVisualisation = function () {
+        visContext.fillStyle = "#EEE";
+        visContext.fillRect(0, 0, visCanvas.width, visCanvas.height);
+
+        drawWave(Object.keys(playingKeys), "black", 2);
+    };
+
+    var updateHUD = function () {
+        $('#hud').text("Time shown approx. " + frequencyDisplayed.toPrecision(4) + "Hz. Scroll to zoom, or click here to reset.");
+    };
+
+    var refreshZoom = function () {
+        frequencyDisplayed = zoomLevel / visCanvas.width;
+        updateHUD();
+        updateVisualisation();
+    };
+
+    $(document).on('mousewheel', function (e) {
         if (e.originalEvent.deltaY > 0) {
             zoomLevel = zoomLevel / ZOOM_INC;
         } else {
             zoomLevel = zoomLevel * ZOOM_INC;
         }
-        frequencyDisplayed = zoomLevel / visCanvas.width;
-        $('#hud').text("Time shown approx. " + frequencyDisplayed.toPrecision(4) + "Hz");
-        updateVisualisation();
+        refreshZoom();
     });
+
+    updateHUD();
 
 
     // Show another line (e.g. the individual notes)
@@ -145,5 +162,22 @@ $(function () {
         }
     });
 
+    $('.piano-key').on('mouseover', function (e) {
+        var key = e.currentTarget;
+        var keyID = key.id;
+        if (PIANO_KEY_FREQUENCIES[keyID]) {
+            updateVisualisation();
+            drawWave([keyID], "#48F", 1);
+        }
+    });
+
+    $('.piano-keyboard').on('mouseout', function (e) {
+        updateVisualisation();
+    });
+
+    $('#hud').on('click', function (e) {
+        resetZoom();
+        refreshZoom();
+    });
 
 });
