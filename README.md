@@ -1,13 +1,18 @@
-IDEAS:
+-- Simple web app for visualising music notes/chords as combined sound waves.
 
-Hookup sound, to optionally play the notes/chords selected.
-Chuck in a HUD showing numbers like:
- - wavelength shown
- - wavelengths selected
+
+
+Further ideas:
+
+ - Hookup sound, to optionally play the notes/chords selected.
  - The total wavelength, where the pattern of the combined notes repeats?
 
 
 
+
+
+For my reference
+```javascript
 // Black key position generator
 
 for (var i = 0; i < 100; i++) {
@@ -16,3 +21,4 @@ for (var i = 0; i < 100; i++) {
         console.log((i+1) * 54 - 19);
     }
 }
+```

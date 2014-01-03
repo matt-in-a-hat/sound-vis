@@ -1,5 +1,5 @@
 /*jslint indent:4*/
-/*global $*/
+/*global $, document*/
 
 $(function () {
 
@@ -54,7 +54,6 @@ $(function () {
     var visCenterHeight = Math.ceil(visCanvas.height / 2);
     var visCanvasWidth = visCanvas.width;
 
-
     var frequencyDisplayed, zoomLevel;
 
     var resetZoom = function () {
@@ -65,14 +64,17 @@ $(function () {
 
     resetZoom();
 
+    // Calculates the y position of the wave for the given key at the given x
     var calculateY = function (x, key) {
         var freq = PIANO_KEY_FREQUENCIES[key];
         var y = Math.sin(x * freq);
         return y;
     };
 
+    // The currently selected keys
     var playingKeys = {};
 
+    // Draws the given array of key names as a combined wave
     var drawWave = function (keys, color, lineWidth) {
         visContext.strokeStyle = color;
         visContext.lineWidth = lineWidth;
@@ -102,6 +104,7 @@ $(function () {
         visContext.stroke();
     };
 
+    // Clears the canvas and draws the selected keys
     var updateVisualisation = function () {
         visContext.fillStyle = "#EEE";
         visContext.fillRect(0, 0, visCanvas.width, visCanvas.height);
@@ -109,16 +112,21 @@ $(function () {
         drawWave(Object.keys(playingKeys), "black", 2);
     };
 
+    // Updates the text at the bottom of the page
     var updateHUD = function () {
         $('#hud').text("Time shown approx. " + frequencyDisplayed.toPrecision(4) + "Hz. Scroll to zoom, or click here to reset.");
     };
 
+    updateHUD();
+
+    // Redraw things when zoom changes
     var refreshZoom = function () {
         frequencyDisplayed = zoomLevel / visCanvas.width;
         updateHUD();
         updateVisualisation();
     };
 
+    // Capture scrolling as zooming in/out of visualisation
     $(document).on('mousewheel', function (e) {
         if (e.originalEvent.deltaY > 0) {
             zoomLevel = zoomLevel / ZOOM_INC;
@@ -128,26 +136,7 @@ $(function () {
         refreshZoom();
     });
 
-    updateHUD();
-
-
-    // Show another line (e.g. the individual notes)
-
-    // visContext.beginPath();
-    // visContext.moveTo(eq(1), visCenterHeight);
-    // visContext.strokeStyle = "blue";
-    // visContext.lineWidth = 1;
-
-    // xScaler = visCanvasWidth / (periodScale * 2 * Math.PI);
-    // for (x = 1; x < visCanvasWidth; x++) {
-    //     scaledX = x / xScaler;
-    //     y = visCenterHeight - eq(scaledX) * visCenterHeight;
-    //     visContext.lineTo(x, y);
-    // }
-    // visContext.stroke();
-
-
-
+    // Add the selected key to list and redraw visulisation
     $('.piano-key').on('click', function (e) {
         var key = e.currentTarget;
         var keyID = key.id;
@@ -162,6 +151,7 @@ $(function () {
         }
     });
 
+    // Draw the hovered key over top of combined wave
     $('.piano-key').on('mouseover', function (e) {
         var key = e.currentTarget;
         var keyID = key.id;
@@ -171,10 +161,12 @@ $(function () {
         }
     });
 
+    // Clear hover key drawing
     $('.piano-keyboard').on('mouseout', function (e) {
         updateVisualisation();
     });
 
+    // Reset zoom
     $('#hud').on('click', function (e) {
         resetZoom();
         refreshZoom();
